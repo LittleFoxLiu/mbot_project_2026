@@ -26,6 +26,8 @@ void celebrate()
 {
     stopMotor();
     buzzer.noTone();
+    if (DEBUG_MODE)
+        return;
 
     // Erika, Herms Niel: single melody in G major, without accompaniment.
     // Melody reference: https://en.wikipedia.org/wiki/Erika_(song)#Music

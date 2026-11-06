@@ -29,7 +29,14 @@ void loop()
     handleWaypoint();
 
     updateNudging();
-    moveForward();
+    if (DEBUG_MODE && DEBUG_NUDGING)
+    {
+        stopMotor();
+    }
+    else
+    {
+        moveForward();
+    }
 
     // ir sensor debug
     //printIRReadings(); // Blocking diagnostics would delay the alternating checks.

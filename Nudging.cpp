@@ -85,16 +85,24 @@ static double nudgeRight()
     return distanceCm;
 }
 
-// Shows why a nudge did or did not happen; 400 cm means no ultrasonic echo.
+// Shows raw sensor readings and the correction that would be applied.
 static void printNudgeDebug(double distanceCm, int irReading)
 {
+    static unsigned long lastPrintMs = 0;
+    static bool havePrinted = false;
+    unsigned long now = millis();
+    if (havePrinted && now - lastPrintMs < DEBUG_NUDGING_PRINT_INTERVAL_MS)
+        return;
+    lastPrintMs = now;
+    havePrinted = true;
+
     Serial.print("US: ");
     Serial.print(distanceCm);
     Serial.print(" cm");
     if (irReading >= 0)
     {
-        Serial.print("  IR drop: ");
-        Serial.print(irStartupReading - irReading);
+        Serial.print("  IR raw: ");
+        Serial.print(irReading);
     }
     Serial.print("  nudge: ");
     if (irNudgeActive)

@@ -22,6 +22,12 @@ void stopMotor()
 
 static void applyForwardSpeed(int speed)
 {
+    if (DEBUG_MODE)
+    {
+        stopMotor();
+        return;
+    }
+
     if (isUltrasonicNudgeActive())
     {
         // Turn in place to the right for the configured angle.
@@ -45,6 +51,12 @@ static void applyForwardSpeed(int speed)
 
 static void moveWithSlowdown(int speed, int direction1, int direction2, unsigned long durationMs)
 {
+    if (DEBUG_MODE)
+    {
+        stopMotor();
+        return;
+    }
+
     int endSpeed = STOP_END_SPEED < speed ? STOP_END_SPEED : speed;
     unsigned long rampMs = STOP_SLOWDOWN_MS < durationMs ? STOP_SLOWDOWN_MS : durationMs;
 
@@ -91,6 +103,11 @@ void moveForward()
 
 void moveForwardGrid()
 {
+    if (DEBUG_MODE)
+    {
+        stopMotor();
+        return;
+    }
     moveWithSlowdown(FORWARD_SPEED, 1, -1, ONE_GRID_TIME_MS);
 }
 
@@ -106,13 +123,12 @@ void turnLeft()
 
 void uTurn()
 {
-    /* Previous two-left-turn implementation, retained for reference:
     turnLeft();
     delay(100);
     turnLeft();
     delay(100);
-    */
 
+    /* Special single-wheel U-turn, retained for reference:
     // First quarter-turn: reverse the left wheel around the stopped right wheel.
     motor1.stop();
     motor2.run(TURN_SPEED);
@@ -127,6 +143,7 @@ void uTurn()
     delay(SINGLE_WHEEL_TURN_90_MS);
     stopMotor();
     delay(100);
+    */
 }
 
 void doubleLeftTurn()
