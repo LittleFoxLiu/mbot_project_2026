@@ -3,6 +3,9 @@
 #include "Movement.h"
 #include "RobotConfig.h"
 
+static_assert(CELEBRATION_BPM >= 30 && CELEBRATION_BPM <= 300,
+              "CELEBRATION_BPM must be 30 to 300");
+
 static void playCelebrationNote(uint16_t frequency, uint8_t eighthNotes)
 {
     unsigned long durationMs = 30000UL * eighthNotes / CELEBRATION_BPM;

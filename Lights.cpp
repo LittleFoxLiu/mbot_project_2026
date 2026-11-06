@@ -1,11 +1,11 @@
 ﻿#include "Lights.h"
 #include "RobotConfig.h"
 
+static const uint8_t DECODER_A_PIN = 11; // Port 1, S1.
+static const uint8_t DECODER_B_PIN = 12; // Port 1, S2.
+
 void setupLights()
 {
-    pinMode(LDR_PIN, INPUT);
-    pinMode(IR_SENSOR_PIN, INPUT);
-
     // Start with red selected.
     digitalWrite(DECODER_A_PIN, HIGH);
     digitalWrite(DECODER_B_PIN, HIGH);

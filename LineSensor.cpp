@@ -2,6 +2,15 @@
 #include "Hardware.h"
 #include "Movement.h"
 #include "RobotConfig.h"
+#include "ColourSensor.h"
+
+static const bool ENABLE_BLACK_LINE_STOP = true; // Stop at black lines, read the colour and turn.
+static const bool BLACK_LINE_REQUIRE_BOTH = true; // Less sensitive: both detectors must see black.
+static const unsigned long WAYPOINT_REARM_MS = 500;
+static_assert(WAYPOINT_REARM_MS < ((1400UL * 150 + FORWARD_SPEED / 2) / FORWARD_SPEED),
+              "Waypoint rearm must be shorter than one grid");
+static bool leavingWaypoint = false;
+static unsigned long lastBlackMs = 0;
 
 static bool isBlackLine(uint8_t state)
 {
@@ -9,28 +18,13 @@ static bool isBlackLine(uint8_t state)
     return BLACK_LINE_REQUIRE_BOTH ? state == S1_IN_S2_IN : state != S1_OUT_S2_OUT;
 }
 
-void printBlackLineReadings()
-{
-    static unsigned long lastPrintMs = 0;
-    static bool havePrinted = false;
-    unsigned long now = millis();
-    if (havePrinted && now - lastPrintMs < 200)
-        return; // Limit serial traffic when the driving loop runs quickly.
-    lastPrintMs = now;
-    havePrinted = true;
-
-    uint8_t state = lineSensor.readSensors();
-    //Serial.println(isBlackLine(state) ? "Black line: YES" : "Black line: NO");
-}
-
-bool onBlackLine()
+static bool onBlackLine()
 {
     return ENABLE_BLACK_LINE_STOP && isBlackLine(lineSensor.readSensors());
 }
 
-bool stopOnBlackLine()
+static bool stopOnBlackLine()
 {
-    printBlackLineReadings();
     if (!ENABLE_BLACK_LINE_STOP)
         return false;
 
@@ -41,6 +35,22 @@ bool stopOnBlackLine()
         return true;
     }
     return false;
+}
+
+void handleWaypoint()
+{
+    if (onBlackLine())
+    {
+        if (!leavingWaypoint)
+        {
+            stopMotor();
+            actOnColour(readWaypointColour());
+            leavingWaypoint = true;
+        }
+        lastBlackMs = millis();
+    }
+    else if (millis() - lastBlackMs >= WAYPOINT_REARM_MS)
+        leavingWaypoint = false;
 }
 
 void waitWithLineMonitoring(unsigned long durationMs)

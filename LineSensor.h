@@ -1,6 +1,4 @@
 ﻿#pragma once
 
-void printBlackLineReadings();
-bool onBlackLine(); // True while the line sensor sees black; does not touch the motors.
-bool stopOnBlackLine(); // Stops motors only while black is detected; does not latch.
+void handleWaypoint(); // Detect and handle a waypoint, then wait for the line to clear before rearming.
 void waitWithLineMonitoring(unsigned long durationMs); // Keep checking during sensor waits.

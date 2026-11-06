@@ -12,6 +12,7 @@ enum ColourCode
 };
 
 int detectColour();
+void setupColourSensor();
 int readWaypointColour();
 void actOnColour(int colour);
 void runColourSensorReadoutMode(); // Print raw R/G/B readings continuously.

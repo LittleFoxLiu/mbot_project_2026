@@ -3,6 +3,8 @@
 #include "Lights.h"
 #include "RobotConfig.h"
 
+static const uint8_t IR_SENSOR_PIN = A2; // Port 3, S1.
+
 static int currentNudge = 0;
 static bool ultrasonicNudgeActive = false;
 static unsigned long ultrasonicNudgeStartedMs = 0;
@@ -13,15 +15,21 @@ static int irStartupReading = 0;
 static unsigned long irNudgeStartedMs = 0;
 static unsigned long irNudgeEndedMs = 0;
 static bool haveIRNudged = false;
+static const unsigned long ULTRASONIC_NUDGE_MS =
+    (((850UL * 100 + TURN_SPEED / 2) / TURN_SPEED) * ULTRASONIC_NUDGE_ANGLE_DEG + 45) / 90;
 
 void setupIRReference()
 {
     // Capture a fixed IR-on reference once at startup, with motors stopped.
+    pinMode(IR_SENSOR_PIN, INPUT);
     shineIR();
     delay(IR_SETTLE_MS);
     irStartupReading = analogRead(IR_SENSOR_PIN);
-    Serial.print("IR startup reference: ");
-    Serial.println(irStartupReading);
+    if (DEBUG_MODE)
+    {
+        Serial.print("IR startup reference: ");
+        Serial.println(irStartupReading);
+    }
 }
 
 int forwardNudge(int speed)
@@ -140,7 +148,7 @@ void updateNudging()
     }
     checkRight = !checkRight;
 
-    if (DEBUG_NUDGING)
+    if (DEBUG_MODE && DEBUG_NUDGING)
         printNudgeDebug(distanceCm, irReading);
 }
 
@@ -155,8 +163,11 @@ int printIRReadings()
     delay(IR_SETTLE_MS);
     int illuminated = analogRead(IR_SENSOR_PIN);
 
-    Serial.print("IR on: ");
-    Serial.println(illuminated);
+    if (DEBUG_MODE)
+    {
+        Serial.print("IR on: ");
+        Serial.println(illuminated);
+    }
 
     return illuminated;
 }

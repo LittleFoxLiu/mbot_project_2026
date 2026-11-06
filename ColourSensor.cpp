@@ -6,32 +6,23 @@
 #include "RobotConfig.h"
 #include <math.h>
 
+static const uint8_t LDR_PIN = A3; // Port 3, S2.
+
+void setupColourSensor()
+{
+    pinMode(LDR_PIN, INPUT);
+}
+
+static const double MAX_COLOUR_DISTANCE = 0.2; // Readings further than this from every reference return unknown.
+
 struct ColourRef
 {
     int code;
     int red, green, blue; // Raw calibration readings.
 };
 
-// Averaged raw readings from each test card. Re-measure after hardware changes.
 static const ColourRef COLOUR_REFS[] = {
-    {COLOUR_RED,        951, 800, 822},
-    {COLOUR_RED,        951, 800, 822},
-    {COLOUR_RED,        951, 800, 822},
-    {COLOUR_GREEN,      879, 910, 887},
-    {COLOUR_GREEN,      879, 901, 889},
-    {COLOUR_GREEN,      879, 910, 887},
-    {COLOUR_ORANGE,     957, 876, 861},
-    {COLOUR_ORANGE,     957, 876, 861},
-    {COLOUR_ORANGE,     957, 876, 861},
-    {COLOUR_PINK,       959, 916, 930},
-    {COLOUR_PINK,       959, 916, 930},
-    {COLOUR_PINK,       959, 916, 930},
-    {COLOUR_LIGHT_BLUE, 862, 890, 928},
-    {COLOUR_LIGHT_BLUE, 862, 890, 928},
-    {COLOUR_LIGHT_BLUE, 862, 890, 928},
-    {COLOUR_WHITE,      960, 943, 951},
-    {COLOUR_WHITE,      960, 943, 951},
-    {COLOUR_WHITE,      960, 943, 951},
+    COLOUR_CALIBRATION_POINTS
 };
 
 static const uint8_t COLOUR_REF_COUNT = sizeof(COLOUR_REFS) / sizeof(COLOUR_REFS[0]);
@@ -92,12 +83,15 @@ int detectColour()
     int red, green, blue;
     readColourRaw(red, green, blue);
 
-    Serial.print("R: ");
-    Serial.print(red);
-    Serial.print(" G: ");
-    Serial.print(green);
-    Serial.print(" B: ");
-    Serial.println(blue);
+    if (DEBUG_MODE)
+    {
+        Serial.print("R: ");
+        Serial.print(red);
+        Serial.print(" G: ");
+        Serial.print(green);
+        Serial.print(" B: ");
+        Serial.println(blue);
+    }
 
     double r = normalise(red, RED_BLACK, RED_WHITE);
     double g = normalise(green, GREEN_BLACK, GREEN_WHITE);
@@ -139,13 +133,16 @@ int detectColour()
 
     if (nearestDistSq > MAX_COLOUR_DISTANCE * MAX_COLOUR_DISTANCE)
     {
-        Serial.print("Colour KNN: ");
-        Serial.print(colourName(COLOUR_UNKNOWN));
-        Serial.print(" (K=");
-        Serial.print(k);
-        Serial.print(", nearest distance=");
-        Serial.print(sqrt(nearestDistSq), 4);
-        Serial.println(")");
+        if (DEBUG_MODE)
+        {
+            Serial.print("Colour KNN: ");
+            Serial.print(colourName(COLOUR_UNKNOWN));
+            Serial.print(" (K=");
+            Serial.print(k);
+            Serial.print(", nearest distance=");
+            Serial.print(sqrt(nearestDistSq), 4);
+            Serial.println(")");
+        }
         return COLOUR_UNKNOWN;
     }
 
@@ -159,13 +156,16 @@ int detectColour()
             best = colour;
         }
     }
-    Serial.print("Colour KNN: ");
-    Serial.print(colourName(best));
-    Serial.print(" (K=");
-    Serial.print(k);
-    Serial.print(", nearest distance=");
-    Serial.print(sqrt(nearestDistSq), 4);
-    Serial.println(")");
+    if (DEBUG_MODE)
+    {
+        Serial.print("Colour KNN: ");
+        Serial.print(colourName(best));
+        Serial.print(" (K=");
+        Serial.print(k);
+        Serial.print(", nearest distance=");
+        Serial.print(sqrt(nearestDistSq), 4);
+        Serial.println(")");
+    }
     return best;
 }
 
@@ -174,8 +174,11 @@ int readWaypointColour()
     while (true)
     {
         int colour = detectColour();
-        Serial.print("Colour code: ");
-        Serial.println(colour);
+        if (DEBUG_MODE)
+        {
+            Serial.print("Colour code: ");
+            Serial.println(colour);
+        }
         if (colour != COLOUR_UNKNOWN)
             return colour;
         delay(COLOUR_RETRY_MS);
@@ -187,27 +190,27 @@ void actOnColour(int colour)
     switch (colour)
     {
     case COLOUR_RED:
-        Serial.println("Red: turn left");
+        if (DEBUG_MODE) Serial.println("Red: turn left");
         turnLeft();
         break;
     case COLOUR_GREEN:
-        Serial.println("Green: turn right");
+        if (DEBUG_MODE) Serial.println("Green: turn right");
         turnRight();
         break;
     case COLOUR_ORANGE:
-        Serial.println("Orange: U-turn (two left turns)");
+        if (DEBUG_MODE) Serial.println("Orange: U-turn (two left turns)");
         uTurn();
         break;
     case COLOUR_PINK:
-        Serial.println("Pink: left, forward one grid, left");
+        if (DEBUG_MODE) Serial.println("Pink: left, forward one grid, left");
         doubleLeftTurn();
         break;
     case COLOUR_LIGHT_BLUE:
-        Serial.println("Blue: right, forward one grid, right");
+        if (DEBUG_MODE) Serial.println("Blue: right, forward one grid, right");
         doubleRightTurn();
         break;
     case COLOUR_WHITE:
-        Serial.println("White: finish");
+        if (DEBUG_MODE) Serial.println("White: finish");
         celebrate();
         while (true)
             ; // Finished: stay stopped until reset.
@@ -216,6 +219,9 @@ void actOnColour(int colour)
 
 void runColourSensorReadoutMode()
 {
+    if (!DEBUG_MODE)
+        return;
+
     Serial.println();
     Serial.println("=== COLOUR SENSOR READOUT ===");
     while (true)
