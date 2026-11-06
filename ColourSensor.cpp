@@ -211,7 +211,8 @@ void actOnColour(int colour)
         break;
     case COLOUR_WHITE:
         if (DEBUG_MODE) Serial.println("White: finish");
-        celebrate();
+        if (!(DEBUG_MODE && COLOUR_SENSOR_READOUT_MODE))
+            celebrate();
         while (true)
             ; // Finished: stay stopped until reset.
     }
