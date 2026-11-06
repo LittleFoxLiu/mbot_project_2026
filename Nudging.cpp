@@ -12,6 +12,7 @@ static unsigned long ultrasonicNudgeEndedMs = 0;
 static bool haveUltrasonicNudged = false;
 static bool irNudgeActive = false;
 static int irStartupReading = 0;
+static bool waitingForIRCalibration = false;
 static unsigned long irNudgeStartedMs = 0;
 static unsigned long irNudgeEndedMs = 0;
 static bool haveIRNudged = false;
@@ -20,15 +21,33 @@ static const unsigned long ULTRASONIC_NUDGE_MS =
 
 void setupIRReference()
 {
-    // Capture a fixed IR-on reference once at startup, with motors stopped.
+    // Capture the IR-on reference at startup. If the sensor starts above 330,
+    // use 290 temporarily and keep checking until a reading reaches 330 or less.
+    // IR checks continue with the fallback while normal movement is underway.
     pinMode(IR_SENSOR_PIN, INPUT);
     shineIR();
     delay(IR_SETTLE_MS);
+    int initialReading = analogRead(IR_SENSOR_PIN);
+    if (initialReading > 330)
+    {
+        irStartupReading = 290;
+        waitingForIRCalibration = true;
+    }
+    else
+    {
+        irStartupReading = initialReading;
+    }
+
+    /* Original calibration: always use the first IR-on reading as reference.
     irStartupReading = analogRead(IR_SENSOR_PIN);
+    */
+
     if (DEBUG_MODE)
     {
         Serial.print("IR startup reference: ");
         Serial.println(irStartupReading);
+        if (waitingForIRCalibration)
+            Serial.println("IR reference is temporary; waiting for a reading <= 330");
     }
 }
 
@@ -50,6 +69,17 @@ static int nudgeLeft()
     unsigned long now = millis();
     // The emitter stays on while driving; detectColour() switches back to it.
     int illuminated = analogRead(IR_SENSOR_PIN);
+
+    if (waitingForIRCalibration && illuminated <= 330)
+    {
+        irStartupReading = illuminated;
+        waitingForIRCalibration = false;
+        if (DEBUG_MODE)
+        {
+            Serial.print("IR calibrated from live reading: ");
+            Serial.println(irStartupReading);
+        }
+    }
 
     // Compare against the fixed startup reading, not a changing ambient reference.
     // Trigger fixed left-turn pulses with a pause; strength does not depend on distance.

@@ -10,16 +10,16 @@ const unsigned long ULTRASONIC_NUDGE_PAUSE_MS = 100; // Pause between fixed-angl
 const int FORWARD_SPEED = 255; // Base motor speed (0 to 255).
 const unsigned long NUDGE_INTERVAL_MS = 100; // Sample ultrasonic every 100 ms and IR every 200 ms.
 const unsigned long DEBUG_NUDGING_PRINT_INTERVAL_MS = 500; // Print IR/ultrasonic diagnostics every 0.5 seconds.
-const bool DEBUG_MODE = true; // Enable diagnostic serial output and readout mode.
-const bool DEBUG_NUDGING = true; // Print ultrasonic distance, raw IR reading and the active nudge on every check; stop motors.
+const bool DEBUG_MODE = false; // Enable diagnostic serial output and readout mode.
+const bool DEBUG_NUDGING = false; // Print ultrasonic distance, raw IR reading and the active nudge on every check; stop motors.
 const bool COLOUR_SENSOR_READOUT_MODE = false; // true: print raw R/G/B readings while stopped; false: normal operation.
 
 const int TURN_SPEED = 255;
 const unsigned int CELEBRATION_BPM = 132; // Higher = faster music.
 
 const unsigned long IR_SETTLE_MS = 50; // Initial IR settling time and interval between readings.
-const int IR_DROP_THRESHOLD = 73; // Nudge when the reading drops by at least this much (lower = more sensitive); -1 disables nudging.
-const unsigned long IR_NUDGE_MS = 50; // Stop the left wheel this long per IR nudge; longer = stronger left turn.
+const int IR_DROP_THRESHOLD = 80; // Nudge when the reading drops by at least this much (lower = more sensitive); -1 disables nudging.
+const unsigned long IR_NUDGE_MS = 75; // Stop the left wheel this long per IR nudge; longer = stronger left turn.
 const unsigned long IR_NUDGE_PAUSE_MS = 130; // Pause between IR nudges.
 
 const unsigned long COLOUR_SETTLE_MS = 150; // Hold each colour before reading the LDR.
