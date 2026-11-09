@@ -6,9 +6,9 @@
 static const unsigned long STOP_SLOWDOWN_MS = 300; // Gradually slow down over the final 300 ms.
 static const int STOP_END_SPEED = 80; // Speed just before stopping; raise if the wheels stall.
 // Derived movement durations: calibrated speed * time / current speed.
-static const unsigned long TURN_90_MS = (850UL * 100 + TURN_SPEED / 2) / TURN_SPEED;
+static const unsigned long TURN_90_MS = (860UL * 100 + TURN_SPEED / 2) / TURN_SPEED;
 static const unsigned long SINGLE_WHEEL_TURN_90_MS = (TURN_90_MS * 190UL + 50UL) / 100UL;
-static const unsigned long ONE_GRID_TIME_MS = (1390UL * 150 + FORWARD_SPEED / 2) / FORWARD_SPEED;
+static const unsigned long ONE_GRID_TIME_MS = (1380UL * 150 + FORWARD_SPEED / 2) / FORWARD_SPEED;
 
 static_assert(STOP_END_SPEED > 0 && STOP_END_SPEED <= 255, "STOP_END_SPEED must be 1 to 255");
 static_assert(FORWARD_SPEED > 0 && FORWARD_SPEED <= 255, "FORWARD_SPEED must be 1 to 255");

@@ -18,7 +18,7 @@ const int TURN_SPEED = 255;
 const unsigned int CELEBRATION_BPM = 132; // Higher = faster music.
 
 const unsigned long IR_SETTLE_MS = 50; // Initial IR settling time and interval between readings.
-const int IR_DROP_THRESHOLD = 80; // Nudge when the reading drops by at least this much (lower = more sensitive); -1 disables nudging.
+const int IR_DROP_THRESHOLD = 76; // Nudge when the reading drops by at least this much (lower = more sensitive); -1 disables nudging.
 const unsigned long IR_NUDGE_MS = 75; // Stop the left wheel this long per IR nudge; longer = stronger left turn.
 const unsigned long IR_NUDGE_PAUSE_MS = 130; // Pause between IR nudges.
 
