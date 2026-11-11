@@ -18,40 +18,40 @@ const int TURN_SPEED = 255;
 const unsigned int CELEBRATION_BPM = 132; // Higher = faster music.
 
 const unsigned long IR_SETTLE_MS = 50; // Initial IR settling time and interval between readings.
-const int IR_DROP_THRESHOLD = 76; // Nudge when the reading drops by at least this much (lower = more sensitive); -1 disables nudging.
-const unsigned long IR_NUDGE_MS = 75; // Stop the left wheel this long per IR nudge; longer = stronger left turn.
+const int IR_DROP_THRESHOLD = 65; // Nudge when the reading drops by at least this much (lower = more sensitive); -1 disables nudging.
+const unsigned long IR_NUDGE_MS = 78; // Stop the left wheel this long per IR nudge; longer = stronger left turn.
 const unsigned long IR_NUDGE_PAUSE_MS = 130; // Pause between IR nudges.
 
-const unsigned long COLOUR_SETTLE_MS = 150; // Hold each colour before reading the LDR.
+const unsigned long COLOUR_SETTLE_MS = 200; // Hold each colour before reading the LDR.
 const uint8_t COLOUR_SAMPLES = 8; // Average this many LDR reads per channel to reduce noise.
 
 // Raw LDR calibration readings on black and white paper (red, green, blue).
-const int RED_BLACK = 605;
-const int GREEN_BLACK = 610;
-const int BLUE_BLACK = 720;
-const int RED_WHITE = 963;
-const int GREEN_WHITE = 947;
-const int BLUE_WHITE = 960;
+const int RED_BLACK = 504;
+const int GREEN_BLACK = 560;
+const int BLUE_BLACK = 711;
+const int RED_WHITE = 952;
+const int GREEN_WHITE = 939;
+const int BLUE_WHITE = 956;
 
 // Averaged raw readings from each test card: {colour code, red, green, blue}.
 // Re-measure after hardware changes. Stored as a macro so the table is emitted
 // only by ColourSensor.cpp, rather than copied into every file including config.
 #define COLOUR_CALIBRATION_POINTS \
-    {COLOUR_RED, 937, 792, 834}, \
-    {COLOUR_RED, 939, 810, 845}, \
-    {COLOUR_RED, 940, 821, 850}, \
-    {COLOUR_GREEN, 840, 895, 887}, \
-    {COLOUR_GREEN, 828, 892, 886}, \
-    {COLOUR_GREEN, 832, 894, 888}, \
-    {COLOUR_ORANGE, 944, 862, 855}, \
-    {COLOUR_ORANGE, 944, 870, 865}, \
-    {COLOUR_ORANGE, 943, 867, 862}, \
-    {COLOUR_PINK, 940, 909, 932}, \
-    {COLOUR_PINK, 945, 909, 935}, \
-    {COLOUR_PINK, 939, 908, 932}, \
-    {COLOUR_LIGHT_BLUE, 824, 888, 937}, \
-    {COLOUR_LIGHT_BLUE, 833, 890, 939}, \
-    {COLOUR_LIGHT_BLUE, 825, 887, 938}, \
-    {COLOUR_WHITE, 946, 939, 954}, \
-    {COLOUR_WHITE, 956, 951, 963}, \
-    {COLOUR_WHITE, 947, 941, 956}
+    {COLOUR_RED, 940, 820, 837}, \
+    {COLOUR_RED, 942, 842, 849}, \
+    {COLOUR_RED, 941, 834, 849}, \
+    {COLOUR_GREEN, 872, 911, 912}, \
+    {COLOUR_GREEN, 864, 899, 888}, \
+    {COLOUR_GREEN, 862, 900, 888}, \
+    {COLOUR_ORANGE, 946, 873, 862}, \
+    {COLOUR_ORANGE, 945, 862, 852}, \
+    {COLOUR_ORANGE, 946, 878, 863}, \
+    {COLOUR_PINK, 947, 913, 923}, \
+    {COLOUR_PINK, 952, 918, 931}, \
+    {COLOUR_PINK, 949, 913, 926}, \
+    {COLOUR_LIGHT_BLUE, 840, 885, 924}, \
+    {COLOUR_LIGHT_BLUE, 856, 901, 945}, \
+    {COLOUR_LIGHT_BLUE, 859, 900, 945}, \
+    {COLOUR_WHITE, 950, 941, 950}, \
+    {COLOUR_WHITE, 956, 949, 949}, \
+    {COLOUR_WHITE, 956, 943, 950}
