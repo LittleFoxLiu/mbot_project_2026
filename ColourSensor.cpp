@@ -156,18 +156,28 @@ int detectColour()
 
     int best = COLOUR_UNKNOWN;
     uint8_t bestVotes = 0;
+    bool tied = false;
     for (uint8_t colour = 0; colour < COLOUR_CLASS_COUNT; colour++)
     {
         if (votes[colour] > bestVotes)
         {
             bestVotes = votes[colour];
             best = colour;
+            tied = false;
         }
+        else if (votes[colour] == bestVotes && votes[colour] > 0)
+            tied = true;
     }
+    // An even split (or any equal top vote) is ambiguous; let the caller rescan.
+    if (tied)
+        best = COLOUR_UNKNOWN;
+
     if (DEBUG_MODE)
     {
         Serial.print("Colour KNN: ");
         Serial.print(colourName(best));
+        if (tied)
+            Serial.print(" (tie; retrying)");
         Serial.print(" (K=");
         Serial.print(k);
         Serial.print(", nearest distance=");
