@@ -12,17 +12,20 @@ static_assert(WAYPOINT_REARM_MS < ((1400UL * 150 + FORWARD_SPEED / 2) / FORWARD_
 static bool leavingWaypoint = false;
 static unsigned long lastBlackMs = 0;
 
+// Apply the configured one-sensor or both-sensors black-line rule.
 static bool isBlackLine(uint8_t state)
 {
     // Requiring both detectors rejects single-detector edge/noise readings.
     return BLACK_LINE_REQUIRE_BOTH ? state == S1_IN_S2_IN : state != S1_OUT_S2_OUT;
 }
 
+// Read the line sensor and report whether a waypoint line is present.
 static bool onBlackLine()
 {
     return ENABLE_BLACK_LINE_STOP && isBlackLine(lineSensor.readSensors());
 }
 
+// Keep the robot stopped whenever a line is detected during a sensor wait.
 static bool stopOnBlackLine()
 {
     if (!ENABLE_BLACK_LINE_STOP)
@@ -37,6 +40,7 @@ static bool stopOnBlackLine()
     return false;
 }
 
+// Read each new waypoint once, then rearm after the robot has left the line.
 void handleWaypoint()
 {
     if (onBlackLine())
@@ -53,6 +57,7 @@ void handleWaypoint()
         leavingWaypoint = false;
 }
 
+// Wait for a duration while continuing to monitor and stop on black lines.
 void waitWithLineMonitoring(unsigned long durationMs)
 {
     unsigned long startedMs = millis();

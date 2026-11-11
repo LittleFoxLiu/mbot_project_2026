@@ -8,6 +8,7 @@
 
 static const uint8_t LDR_PIN = A3; // Port 3, S2.
 
+// Configure the light-dependent resistor input.
 void setupColourSensor()
 {
     pinMode(LDR_PIN, INPUT);
@@ -37,6 +38,7 @@ static uint8_t getKnnK()
     return k > 0 ? k : 1;
 }
 
+// Return a readable label for a colour code, including unknown values.
 const char *colourName(int code)
 {
     switch (code)
@@ -53,6 +55,7 @@ const char *colourName(int code)
 
 static int readColourChannel(void (*shine)());
 
+// Read each channel under its matching LED, then restore the IR emitter.
 static void readColourRaw(int &red, int &green, int &blue)
 {
     red = readColourChannel(shineRed);
@@ -61,6 +64,7 @@ static void readColourRaw(int &red, int &green, int &blue)
     shineIR();
 }
 
+// Settle the selected LED and average the configured number of LDR samples.
 static int readColourChannel(void (*shine)())
 {
     shine();
@@ -72,12 +76,13 @@ static int readColourChannel(void (*shine)())
     return sum / COLOUR_SAMPLES;
 }
 
-// Scale a raw reading so black is 0 and white is 1.
+// Map a raw channel value onto the black-to-white calibration scale.
 static double normalise(int raw, int black, int white)
 {
     return (double)(raw - black) / (white - black);
 }
 
+// Classify a waypoint by normalized RGB distance and K-nearest-neighbour voting.
 int detectColour()
 {
     int red, green, blue;
@@ -97,7 +102,8 @@ int detectColour()
     double g = normalise(green, GREEN_BLACK, GREEN_WHITE);
     double b = normalise(blue, BLUE_BLACK, BLUE_WHITE);
 
-    // K-nearest neighbours, with K derived from calibration points per colour.
+    // Compare normalized channels so different raw calibration ranges are comparable.
+    // Squared Euclidean RGB distance preserves nearest-point ordering without square roots.
     const uint8_t k = getKnnK();
     double distances[COLOUR_REF_COUNT];
     for (uint8_t index = 0; index < COLOUR_REF_COUNT; index++)
@@ -111,6 +117,7 @@ int detectColour()
 
     uint8_t votes[COLOUR_CLASS_COUNT] = {};
     double nearestDistSq = MAX_COLOUR_DISTANCE * MAX_COLOUR_DISTANCE;
+    // Select K distinct nearest points and count their votes by colour class.
     for (uint8_t neighbour = 0; neighbour < k; neighbour++)
     {
         int nearestIndex = -1;
@@ -131,6 +138,7 @@ int detectColour()
         distances[nearestIndex] = 1.0e30; // Do not select the same point twice.
     }
 
+    // Reject samples outside the allowed radius even if one calibration point is closest.
     if (nearestDistSq > MAX_COLOUR_DISTANCE * MAX_COLOUR_DISTANCE)
     {
         if (DEBUG_MODE)
@@ -169,6 +177,7 @@ int detectColour()
     return best;
 }
 
+// Retry sensor classification until a known colour is returned.
 int readWaypointColour()
 {
     while (true)
@@ -185,6 +194,7 @@ int readWaypointColour()
     }
 }
 
+// Dispatch a recognized waypoint colour to its movement or finish action.
 void actOnColour(int colour)
 {
     switch (colour)
@@ -218,6 +228,7 @@ void actOnColour(int colour)
     }
 }
 
+// Continuously print raw RGB samples for sensor calibration diagnostics.
 void runColourSensorReadoutMode()
 {
     if (!DEBUG_MODE)

@@ -6,6 +6,7 @@
 #include "ColourSensor.h"
 #include "Celebration.h"
 
+// Initialize the robot hardware and optional diagnostic modes.
 void setup()
 {
     stopMotor();
@@ -21,9 +22,9 @@ void setup()
         runColourSensorReadoutMode();
     }
 
-    // celebrate(); // Play once on startup; press reset to replay.
 }
 
+// Handle waypoints, refresh sensor nudges, and keep the robot moving.
 void loop()
 {
     handleWaypoint();
@@ -38,6 +39,4 @@ void loop()
         moveForward();
     }
 
-    // ir sensor debug
-    //printIRReadings(); // Blocking diagnostics would delay the alternating checks.
 }

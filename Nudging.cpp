@@ -19,6 +19,7 @@ static bool haveIRNudged = false;
 static const unsigned long ULTRASONIC_NUDGE_MS =
     (((850UL * 100 + TURN_SPEED / 2) / TURN_SPEED) * ULTRASONIC_NUDGE_ANGLE_DEG + 45) / 90;
 
+// Set up the IR sensor and capture a stable reference, with a live fallback if needed.
 void setupIRReference()
 {
     // Capture the IR-on reference at startup. If the sensor starts above 330,
@@ -38,10 +39,6 @@ void setupIRReference()
         irStartupReading = initialReading;
     }
 
-    /* Original calibration: always use the first IR-on reading as reference.
-    irStartupReading = analogRead(IR_SENSOR_PIN);
-    */
-
     if (DEBUG_MODE)
     {
         Serial.print("IR startup reference: ");
@@ -51,6 +48,7 @@ void setupIRReference()
     }
 }
 
+// Scale the selected steering correction to the current forward speed.
 int forwardNudge(int speed)
 {
     // updateNudging() selects only one sensor's correction at a time.
@@ -58,12 +56,13 @@ int forwardNudge(int speed)
     return (long)currentNudge * speed / FORWARD_SPEED;
 }
 
+// Report whether an IR-triggered left correction pulse is active.
 bool isIRNudgeActive()
 {
     return irNudgeActive;
 }
 
-// Returns the IR reading so the debug output can show the drop.
+// Compare the IR reading with its startup reference and start a timed left pulse when needed.
 static int nudgeLeft()
 {
     unsigned long now = millis();
@@ -94,6 +93,7 @@ static int nudgeLeft()
     return illuminated;
 }
 
+// Read the ultrasonic sensor and start a timed right pulse when an obstacle is close.
 static double nudgeRight()
 {
     double distanceCm = ultrasonic.distanceCm();
@@ -115,7 +115,7 @@ static double nudgeRight()
     return distanceCm;
 }
 
-// Shows raw sensor readings and the correction that would be applied.
+// Print rate-limited sensor readings and the correction currently active.
 static void printNudgeDebug(double distanceCm, int irReading)
 {
     static unsigned long lastPrintMs = 0;
@@ -143,6 +143,7 @@ static void printNudgeDebug(double distanceCm, int irReading)
         Serial.println("none");
 }
 
+// Expire correction pulses, sample sensors on schedule, and resolve close-wall priority.
 void updateNudging()
 {
     static unsigned long lastCheckMs = 0;
@@ -167,7 +168,7 @@ void updateNudging()
     lastCheckMs = now;
     haveChecked = true;
 
-    // Sample ultrasonic distance on every check so close-range priority responds promptly.
+    // Always sample ultrasonic; check IR on alternating slots unless close range has priority.
     currentNudge = 0;
     double distanceCm = nudgeRight();
     bool ultrasonicPriority = distanceCm > 0
@@ -176,11 +177,13 @@ void updateNudging()
     int irReading = -1; // Stays -1 on checks that skip the IR sensor.
     if (ultrasonicPriority)
     {
+        // Close-range ultrasonic readings take precedence over IR steering.
         irNudgeActive = false;
         irNudgeEndedMs = now;
     }
     else if (!checkRight)
     {
+        // IR is checked on every other slot to alternate sensor work.
         currentNudge = 0;
         irReading = nudgeLeft();
     }
@@ -190,11 +193,13 @@ void updateNudging()
         printNudgeDebug(distanceCm, irReading);
 }
 
+// Report whether an ultrasonic-triggered right correction pulse is active.
 bool isUltrasonicNudgeActive()
 {
     return ultrasonicNudgeActive;
 }
 
+// Take and optionally print a settled IR reading for diagnostics while stopped.
 int printIRReadings()
 {
     shineIR();

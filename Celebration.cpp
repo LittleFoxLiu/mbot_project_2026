@@ -6,6 +6,7 @@
 static_assert(CELEBRATION_BPM >= 30 && CELEBRATION_BPM <= 300,
               "CELEBRATION_BPM must be 30 to 300");
 
+// Play one note or timed rest, leaving a brief silence after each pitched note.
 static void playCelebrationNote(uint16_t frequency, uint8_t eighthNotes)
 {
     unsigned long durationMs = 30000UL * eighthNotes / CELEBRATION_BPM;
@@ -22,6 +23,7 @@ static void playCelebrationNote(uint16_t frequency, uint8_t eighthNotes)
     delay(durationMs - soundMs);
 }
 
+// Stop the robot and play the configured melody unless debug mode is enabled.
 void celebrate()
 {
     stopMotor();
